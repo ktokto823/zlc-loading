@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Z-LAST CHAOS</title>
+<style>
+  :root {
+    --bg: #070606;
+    --ink: #ece7e5;
+    --dim: #a89a95;
+    --faint: #6d5b57;
+    --blood: #b1121a;
+    --blood-soft: #e0242c;
+    --blood-deep: #5e0a0f;
+    --rule: rgba(200, 34, 44, 0.22);
+    --rule-strong: rgba(224, 36, 44, 0.55);
+    --heavy: Impact, Haettenschweiler, "Arial Narrow Bold", "Arial Black", sans-serif;
+    --serif: Georgia, "Times New Roman", serif;
+    --mono: Consolas, "Courier New", monospace;
+    --pad: 3.4vw;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  /* ---------- КРАСНЫЙ ФОН ---------- */
+
+  .bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(1100px 760px at 82% 8%, rgba(170, 10, 22, 0.20), transparent 62%),
+      radial-gradient(880px 660px at 12% 88%, rgba(120, 6, 14, 0.18), transparent 60%),
+      radial-gradient(1200px 900px at 50% 50%, rgba(80, 4, 9, 0.10), transparent 72%),
+      linear-gradient(180deg, #0a0607 0%, #070606 55%, #0b0506 100%);
+  }
+
+  /* Статичная кровь (без анимации) */
+  .blood {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.62;
+    mix-blend-mode: normal;
+    background:
+      radial-gradient(60px 42px at 11% 24%, rgba(150, 8, 16, 0.55) 0 58%, rgba(150, 8, 16, 0) 60%),
+      radial-gradient(26px 20px at 14% 20%, rgba(150, 8, 16, 0.50) 0 60%, rgba(150, 8, 16, 0) 62%),
+      radial-gradient(12px 10px at 9% 28%, rgba(190, 20, 28, 0.60) 0 60%, rgba(190, 20, 28, 0) 62%),
+      radial-gradient(74px 50px at 88% 70%, rgba(120, 6, 14, 0.50) 0 56%, rgba(120, 6, 14, 0) 58%),
+      radial-gradient(20px 16px at 84% 66%, rgba(160, 12, 20, 0.45) 0 60%, rgba(160, 12, 20, 0) 62%),
+      radial-gradient(46px 30px at 72% 18%, rgba(140, 8, 16, 0.35) 0 55%, rgba(140, 8, 16, 0) 57%),
+      radial-gradient(16px 12px at 76% 15%, rgba(180, 18, 26, 0.40) 0 60%, rgba(180, 18, 26, 0) 62%),
+      radial-gradient(90px 60px at 30% 92%, rgba(110, 5, 12, 0.42) 0 54%, rgba(110, 5, 12, 0) 56%),
+      radial-gradient(30px 22px at 34% 88%, rgba(150, 10, 18, 0.40) 0 58%, rgba(150, 10, 18, 0) 60%),
+      radial-gradient(10px 9px at 26% 95%, rgba(190, 22, 30, 0.50) 0 60%, rgba(190, 22, 30, 0) 62%),
+      radial-gradient(600px 300px at 50% 118%, rgba(90, 4, 10, 0.35), transparent 70%);
+    filter: blur(0.4px) contrast(1.12);
+  }
+
+  /* Потёки сверху (статичные) */
+  .drips {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 34vh;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.5;
+    background:
+      linear-gradient(180deg, rgba(150, 10, 18, 0.55), rgba(150, 10, 18, 0) 100%),
+      radial-gradient(8px 90px at 18% 0, rgba(160, 12, 20, 0.55), transparent 70%),
+      radial-gradient(6px 130px at 47% 0, rgba(140, 8, 16, 0.45), transparent 72%),
+      radial-gradient(9px 70px at 71% 0, rgba(170, 14, 22, 0.50), transparent 70%),
+      radial-gradient(5px 110px at 89% 0, rgba(140, 8, 16, 0.40), transparent 72%);
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 100%);
+  }
+
+  .shade {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, rgba(7,6,6,0.94) 0%, rgba(7,6,6,0.55) 52%, rgba(7,6,6,0.86) 100%),
+      radial-gradient(ellipse at 50% 42%, transparent 38%, rgba(0,0,0,0.72) 100%);
+  }
+
+  /* Статичное зерно */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.10;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 0.15  0 0 0 0 0.18  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  /* ---------- КАРКАС ---------- */
+
+  .page {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 3.4vh var(--pad) 0;
+  }
+
+  /* ---------- ВЕРХНЯЯ ПАНЕЛЬ ---------- */
+  /* зеркально референсу: плеер слева, бренд справа */
+
+  .top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 2vw;
+    padding-bottom: 1.6vh;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .top b { color: var(--ink); font-weight: 400; }
+
+  .brand {
+    white-space: nowrap;
+    text-align: right;
+  }
+  .brand .sess { margin-right: 18px; font-variant-numeric: tabular-nums; }
+  .brand .nm { color: var(--blood-soft); }
+
+  .nav {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+  }
+  .tab {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    padding: 9px 20px 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+    transition: color 0.25s ease, background 0.25s ease;
+  }
+  .tab i {
+    font-style: normal;
+    font-size: 10px;
+    color: var(--faint);
+    letter-spacing: 1px;
+    transition: color 0.25s ease;
+  }
+  .tab::after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 0;
+    height: 2px;
+    background: var(--blood);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+  }
+  .tab:hover { color: var(--ink); background: rgba(224,36,44,0.06); }
+  .tab:hover i { color: var(--dim); }
+  .tab.on { color: var(--ink); }
+  .tab.on i { color: var(--blood-soft); }
+  .tab.on::after { transform: scaleX(1); }
+
+  /* Плеер */
+  .player {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .eq {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 16px;
+  }
+  .eq span {
+    width: 2px;
+    height: 100%;
+    background: var(--dim);
+    transform: scaleY(0.18);
+    transform-origin: bottom;
+    animation: eq 0.9s ease-in-out infinite alternate paused;
+  }
+  .eq span:nth-child(2) { animation-duration: 0.6s; animation-delay: -0.2s; }
+  .eq span:nth-child(3) { animation-duration: 1.1s; animation-delay: -0.5s; }
+  .eq span:nth-child(4) { animation-duration: 0.75s; animation-delay: -0.35s; }
+  .eq span:nth-child(5) { animation-duration: 0.95s; animation-delay: -0.1s; }
+  .player.playing .eq span { background: var(--blood-soft); animation-play-state: running; }
+  @keyframes eq {
+    from { transform: scaleY(0.18); }
+    to   { transform: scaleY(1); }
+  }
+
+  .track {
+    max-width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 2px;
+  }
+
+  .pbtn {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .pbtn:hover { background: rgba(224,36,44,0.14); border-color: var(--rule-strong); }
+  .pbtn svg { width: 12px; height: 12px; fill: currentColor; display: block; }
+  .pbtn .i-pause, .player.playing .pbtn .i-play { display: none; }
+  .player.playing .pbtn .i-pause { display: block; }
+  .pbtn .i-muted, .pbtn.muted .i-vol { display: none; }
+  .pbtn.muted .i-muted { display: block; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 92px;
+    height: 20px;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 2px;
+    background: linear-gradient(to right, var(--blood-soft) var(--v, 40%), rgba(255,255,255,0.16) var(--v, 40%));
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 8px;
+    height: 14px;
+    margin-top: -6px;
+    background: var(--ink);
+    border: 0;
+    border-radius: 0;
+  }
+  input[type=range]::-moz-range-track { height: 2px; background: rgba(255,255,255,0.16); }
+  input[type=range]::-moz-range-progress { height: 2px; background: var(--blood-soft); }
+  input[type=range]::-moz-range-thumb { width: 8px; height: 14px; background: var(--ink); border: 0; border-radius: 0; }
+
+  .hint {
+    position: fixed;
+    z-index: 5;
+    top: 9vh;
+    left: var(--pad);
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #0b0506;
+    background: var(--blood-soft);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+  .hint.show { opacity: 1; transform: translateY(0); animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge { 50% { transform: translateY(3px); } }
+
+  /* ---------- СЕРЕДИНА (зеркально: панель слева, факт справа) ---------- */
+
+  .mid {
+    display: grid;
+    grid-template-columns: minmax(330px, 1fr) minmax(0, 1.5fr);
+    column-gap: 6vw;
+    align-items: end;
+    padding: 4vh 0 5vh;
+    min-height: 0;
+  }
+
+  .fact { text-align: right; }
+  .fact-label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    margin-bottom: 2.4vh;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .fact-label::before { content: ""; width: 64px; height: 1px; background: var(--blood); }
+  .fact-label b { color: var(--ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+  .fact-text {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(22px, 2.1vw, 42px);
+    line-height: 1.3;
+    color: var(--ink);
+    margin-left: auto;
+    max-width: 22em;
+    min-height: 4.2em;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fact-text.out { opacity: 0; transform: translateY(8px); }
+
+  /* ---------- БОКОВАЯ ПАНЕЛЬ ---------- */
+
+  .side {
+    position: relative;
+    min-width: 0;
+    min-height: 340px;
+  }
+
+  .pane {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3.2vh;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0s linear 0.35s;
+  }
+  .pane.on {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity 0.45s ease 0.1s, transform 0.45s cubic-bezier(.2,.8,.2,1) 0.1s, visibility 0s;
+  }
+
+  .sheet-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blood-soft);
+    margin-bottom: 10px;
+  }
+
+  .sheet { border-top: 1px solid var(--rule-strong); }
+  .row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 14px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 13px;
+    align-items: baseline;
+  }
+  .row dt { color: var(--dim); letter-spacing: 2px; font-size: 11px; text-transform: uppercase; }
+  .row dd {
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+  }
+  .row dd.hot { color: var(--blood-soft); }
+
+  .rules {
+    list-style: none;
+    border-top: 1px solid var(--rule-strong);
+    counter-reset: r;
+  }
+  .rules li {
+    counter-increment: r;
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    gap: 6px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .rules li::before {
+    content: counter(r, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--blood-soft);
+    padding-top: 3px;
+  }
+
+  .log {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 104px;
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .log div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: lin 0.35s ease-out both;
+  }
+  .log div:nth-child(1) { color: var(--ink); }
+  .log div:nth-child(2) { color: #b9aaa5; }
+  .log div:nth-child(n+4) { color: var(--faint); }
+  .log i { font-style: normal; margin-right: 12px; color: var(--faint); }
+  @keyframes lin {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .keys {
+    margin-top: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--faint);
+    text-transform: uppercase;
+  }
+  .keys kbd {
+    font-family: var(--mono);
+    display: inline-block;
+    min-width: 20px;
+    padding: 1px 5px;
+    margin: 0 3px 0 10px;
+    text-align: center;
+    color: var(--dim);
+    border: 1px solid var(--faint);
+  }
+  .keys kbd:first-child { margin-left: 0; }
+
+  /* ---------- НИЗ (зеркально: процент слева, статус справа) ---------- */
+
+  .bottom { position: relative; }
+
+  .status-row {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 3vw;
+    padding-bottom: 1.4vh;
+  }
+  .status { min-width: 0; font-family: var(--mono); letter-spacing: 1px; text-align: right; }
+  #sMain {
+    display: block;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  #sSub {
+    display: block;
+    font-size: 12px;
+    color: var(--dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60vw;
+  }
+  .count {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-top: 6px;
+    display: block;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pct {
+    font-family: var(--heavy);
+    font-size: min(8.5vw, 15vh);
+    line-height: 0.82;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+  }
+  .pct sup {
+    font-size: 0.4em;
+    margin-left: 4px;
+    color: var(--blood-soft);
+    vertical-align: top;
+    position: relative;
+    top: 0.12em;
+  }
+
+  .line { position: relative; height: 3px; background: rgba(255,255,255,0.10); }
+  .line i {
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--blood-deep), var(--blood-soft));
+  }
+
+  .title-wrap {
+    overflow: hidden;
+    margin-top: 1.2vh;
+    height: min(14.4vw, 25vh);
+  }
+  .title {
+    font-family: var(--heavy);
+    font-size: min(17vw, 29vh);
+    line-height: 0.86;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-align: right;
+    color: var(--ink);
+    transform: translateY(105%);
+    animation: rise 1.1s cubic-bezier(.16,.8,.2,1) 0.15s forwards;
+  }
+  .title b { color: var(--blood-soft); font-weight: 400; }
+  @keyframes rise { to { transform: translateY(0); } }
+
+  .mark { position: fixed; z-index: 3; width: 14px; height: 14px; pointer-events: none; }
+  .mark::before, .mark::after { content: ""; position: absolute; background: var(--faint); }
+  .mark::before { left: 6px; top: 0; width: 1px; height: 14px; }
+  .mark::after  { left: 0; top: 6px; width: 14px; height: 1px; }
+  .m1 { left: 1.2vw; top: 1.6vh; }
+  .m2 { right: 1.2vw; top: 1.6vh; }
+  .m3 { left: 1.2vw; bottom: 1.6vh; }
+  .m4 { right: 1.2vw; bottom: 1.6vh; }
+
+  @media (max-width: 1200px) {
+    .nav .tab { padding: 9px 12px 10px; letter-spacing: 2px; }
+    .track { display: none; }
+  }
+  @media (max-width: 1000px) {
+    .mid { grid-template-columns: 1fr; row-gap: 3vh; align-items: start; }
+    .side { display: none; }
+    .top { grid-template-columns: 1fr auto; }
+    .nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Музыка: играет рандомно один из треков. Файлы лежат рядом с index.html -->
+<audio id="bgm" preload="auto"></audio>
+
+<div class="bg"></div>
+<div class="blood"></div>
+<div class="drips"></div>
+<div class="shade"></div>
+<div class="grain"></div>
+
+<div class="mark m1"></div>
+<div class="mark m2"></div>
+<div class="mark m3"></div>
+<div class="mark m4"></div>
+
+<div class="hint" id="hint">Нажмите, чтобы включить музыку</div>
+
+<div class="page">
+
+  <header class="top">
+    <div class="player" id="player">
+      <div class="eq"><span></span><span></span><span></span><span></span><span></span></div>
+      <span class="track" id="trackName">Музыка</span>
+      <button class="pbtn" id="btnPlay" title="Играть / пауза">
+        <svg class="i-play" viewBox="0 0 12 12"><path d="M2 1l9 5-9 5z"/></svg>
+        <svg class="i-pause" viewBox="0 0 12 12"><path d="M2 1h3v10H2zM7 1h3v10H7z"/></svg>
+      </button>
+      <button class="pbtn" id="btnMute" title="Без звука">
+        <svg class="i-vol" viewBox="0 0 12 12"><path d="M1 4h2.5L7 1v10L3.5 8H1z"/><path d="M8.6 3.4l.8-.7a4.2 4.2 0 010 6.6l-.8-.7a3.2 3.2 0 000-5.2z"/></svg>
+        <svg class="i-muted" viewBox="0 0 12 12"><path d="M1 4h2.5L7 1v10L3.5 8H1z"/><path d="M8.2 4.2l.8-.8 1.5 1.5 1.5-1.5.8.8L11.3 5.7l1.5 1.5-.8.8-1.5-1.5L9 8l-.8-.8 1.5-1.5z" transform="translate(-1 0.3) scale(0.9)"/></svg>
+      </button>
+      <input type="range" id="vol" min="0" max="100" value="40" aria-label="Громкость">
+    </div>
+
+    <nav class="nav" id="nav">
+      <button class="tab on" data-pane="info"><i>01</i>Данные</button>
+      <button class="tab" data-pane="rules"><i>02</i>Правила</button>
+      <button class="tab" data-pane="links"><i>03</i>Контакты</button>
+    </nav>
+
+    <div class="brand"><span class="sess">Сессия <b id="elapsed">00:00</b></span><b class="nm">Z-Last Chaos</b> &nbsp;/&nbsp; Garry's Mod</div>
+  </header>
+
+  <section class="mid">
+
+    <aside class="side">
+
+      <div class="pane on" id="pane-info">
+        <div>
+          <div class="sheet-title">Данные подключения</div>
+          <dl class="sheet">
+            <div class="row"><dt>Сервер</dt><dd id="host">—</dd></div>
+            <div class="row"><dt>Карта</dt><dd id="map">—</dd></div>
+            <div class="row"><dt>Режим</dt><dd id="mode" class="hot">—</dd></div>
+            <div class="row"><dt>Слоты</dt><dd id="slots">—</dd></div>
+            <div class="row"><dt>Игроков онлайн</dt><dd id="online">—</dd></div>
+            <div class="row"><dt>Время работы сервера</dt><dd id="uptime">—</dd></div>
+            <div class="row"><dt>Ваше время на сервере</dt><dd id="playtime">—</dd></div>
+            <div class="row"><dt>SteamID64</dt><dd id="sid64">—</dd></div>
+            <div class="row"><dt>SteamID</dt><dd id="sid">—</dd></div>
+          </dl>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
+
+      <div class="pane" id="pane-rules">
+        <div>
+          <div class="sheet-title">Правила сервера</div>
+          <ol class="rules" id="rules"></ol>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-links">
+        <div>
+          <div class="sheet-title">Где нас найти</div>
+          <dl class="sheet" id="links"></dl>
+        </div>
+      </div>
+
+    </aside>
+
+    <div class="fact">
+      <div class="fact-label">Интересный факт <b id="factNo">01 / 30</b></div>
+      <p class="fact-text" id="fact"></p>
+    </div>
+
+  </section>
+
+  <footer class="bottom">
+    <div class="status-row">
+      <div class="status">
+        <span id="sMain">Подключение</span>
+        <span id="sSub">ожидание данных</span>
+        <span class="count" id="count">— / —</span>
+      </div>
+      <div class="pct"><span id="pct">0</span><sup>%</sup></div>
+    </div>
+    <div class="line"><i id="fill"></i></div>
+    <div class="title-wrap"><h1 class="title">Z-LAST <b>CHAOS</b></h1></div>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, "0");
+
+  /* =========================================================
+     НАСТРОЙКИ — правь тут
+     ========================================================= */
+
+  // Треки. Файлы рядом с index.html. Если их несколько — играют в случайном порядке.
+  const MUSIC = [
+    { src: "music1.mp3", title: "Echoes from the Abyss" }
+  ];
+  const MUSIC_VOLUME = 40;   // громкость 0-100
+
+  // Скриншоты Z-City как фон (по желанию). Пример: ["img/shot1.jpg", "img/shot2.jpg"]
+  const BACKGROUNDS = [];
+  const BG_INTERVAL = 9000;
+
+  // 30 фактов о Z-City
+  const FACTS = [
+    "Z-City (Хомаград) — постсоветский город, который пережил катастрофу и так и не оправился.",
+    "Сердце Z-City — режим Homicide: среди мирных прячутся предатели, и до конца раунда никто не знает, кому верить.",
+    "У предателей есть профессии и подроли: от психопата с ближним боем до тихого стрелка на крыше.",
+    "Психопат убивает почти всегда сзади и ближним оружием — услышать его шаги уже поздно.",
+    "Медвежий капкан стоит дешевле пули, а срабатывает громче.",
+    "Казни Manhunt позволяют добить уже упавшего — город не любит оставлять свидетелей.",
+    "Раунд заканчивается не когда все мертвы, а когда побеждает одна из сторон.",
+    "Смена роли через ULX вступает в силу только со следующего раунда.",
+    "Система вины (guilt) наказывает за агрессию против невинных — за всё придётся ответить.",
+    "Опыт и уровни открывают доступ к новым возможностям и серверному магазину.",
+    "Chaos Pass — пропуск, который даёт доступ к особым функциям и товарам сервера.",
+    "Карта усеяна точками лута и мэппоинтами, которые местные знают наизусть.",
+    "Режим Defense превращает город в осаду: волны врагов против горстки выживших.",
+    "Кооперативные режимы позволяют идти вместе — но доверие всё равно под запретом.",
+    "RTV (Rock the Vote) меняет карту голосованием, когда текущая надоела.",
+    "Профессии дают пассивные бонусы: кто-то быстрее, кто-то тише, кто-то просто живучее.",
+    "Перегруз решает исход: с полной сумкой вы бежите медленнее и умираете быстрее.",
+    "Кровь, тишина и редкие выстрелы — три главных звука Z-City.",
+    "Ночь — не время для прогулок: свет, шум и зрение решают, кто доживёт.",
+    "Медицина ограничена: бинт помогает не всегда, а жгут иногда — единственный шанс.",
+    "Дверь и замок — тоже оружие, просто медленное.",
+    "Фонарик выдаёт вас быстрее, чем любой выстрел.",
+    "Иногда безопаснее всего — стоять в стороне и смотреть, как спорят другие.",
+    "Победа чаще зависит не от прицела, а от того, кто первым понял, что предатель рядом.",
+    "У каждой тихой улицы здесь своя цена, и платят её не всегда деньгами.",
+    "Заброшенные дома выглядят пустыми ровно до того момента, как вы войдёте.",
+    "Тот, кто побежал первым, уже проиграл.",
+    "Не каждый союзник в этом городе — человек.",
+    "Худшее оружие — то, о котором знают все. Лучшее — то, о котором не знает никто.",
+    "Z-Last Chaos: последний хаос — это когда правила кончились, а выстрелы ещё нет."
+  ];
+  const FACT_INTERVAL = 9000;
+
+  // Правила сервера
+  const RULES = [
+    "Уважай игроков и администрацию.",
+    "Запрещены читы, скрипты и использование багов.",
+    "Запрещён тимкилл без игровой причины (RDM).",
+    "Не спамь в текстовом и голосовом чате.",
+    "Не уходи в AFK надолго во время активного раунда.",
+    "Решения администрации обсуждаются в Discord, а не в игровом чате."
+  ];
+
+  // Контакты
+  const LINKS = [
+    ["Discord", "https://discord.gg/ваш-инвайт"],
+    ["Steam-группа", "https://steamcommunity.com/groups/ваша-группа"],
+    ["Сайт", "https://ваш-сайт"]
+  ];
+
+  /* =========================================================
+     ДАЛЬШЕ МОЖНО НЕ ТРОГАТЬ
+     ========================================================= */
+
+  let filesTotal = 0;
+  let filesNeeded = 0;
+  let targetPct = 0;
+  let shownPct = 0;
+  const startedAt = Date.now();
+
+  /* ---------- ТАЙМЕР СЕССИИ ---------- */
+  setInterval(() => {
+    const s = Math.floor((Date.now() - startedAt) / 1000);
+    $("elapsed").textContent = pad(Math.floor(s / 60)) + ":" + pad(s % 60);
+  }, 1000);
+
+  /* ---------- МЕНЮ ---------- */
+  const tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+  function openPane(name) {
+    tabs.forEach((t) => t.classList.toggle("on", t.getAttribute("data-pane") === name));
+    ["info", "rules", "links"].forEach((n) => {
+      $("pane-" + n).classList.toggle("on", n === name);
+    });
+  }
+  tabs.forEach((t) => t.addEventListener("click", () => openPane(t.getAttribute("data-pane"))));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "1") openPane("info");
+    else if (e.key === "2") openPane("rules");
+    else if (e.key === "3") openPane("links");
+    else if (e.key === "m" || e.key === "M" || e.key === "ь" || e.key === "Ь") toggleMute();
+    else if (e.key === " ") { e.preventDefault(); togglePlay(); }
+  });
+
+  // Правила
+  RULES.forEach((r) => {
+    const li = document.createElement("li");
+    li.textContent = r;
+    $("rules").appendChild(li);
+  });
+
+  // Контакты
+  LINKS.forEach((pair) => {
+    const row = document.createElement("div");
+    row.className = "row";
+    const dt = document.createElement("dt");
+    dt.textContent = pair[0];
+    const dd = document.createElement("dd");
+    dd.textContent = pair[1];
+    row.appendChild(dt);
+    row.appendChild(dd);
+    $("links").appendChild(row);
+  });
+
+  /* ---------- МУЗЫКА (рандом) ---------- */
+  const bgm = $("bgm");
+  const playerEl = $("player");
+  const volEl = $("vol");
+  const hintEl = $("hint");
+  let muted = false;
+  let failed = false;
+  let trackIdx = 0;
+
+  // Перемешать порядок треков и начать со случайного
+  const order = MUSIC.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  let orderPos = 0;
+
+  function loadTrack(pos) {
+    const t = MUSIC[order[pos % order.length]];
+    trackIdx = order[pos % order.length];
+    bgm.src = t.src;
+    $("trackName").textContent = t.title;
+  }
+
+  function setVolUi() {
+    volEl.style.setProperty("--v", volEl.value + "%");
+    $("btnMute").classList.toggle("muted", muted || Number(volEl.value) === 0);
+  }
+  function applyVolume() {
+    bgm.volume = muted ? 0 : Math.max(0, Math.min(1, Number(volEl.value) / 100));
+    setVolUi();
+  }
+  function setPlayingUi(on) { playerEl.classList.toggle("playing", on); }
+
+  function tryPlay() {
+    if (failed) return;
+    const p = bgm.play();
+    if (p && typeof p.then === "function") {
+      p.then(() => { setPlayingUi(true); hintEl.classList.remove("show"); })
+       .catch(() => { setPlayingUi(false); hintEl.classList.add("show"); });
+    }
+  }
+  function togglePlay() {
+    if (failed) return;
+    if (bgm.paused) tryPlay(); else { bgm.pause(); setPlayingUi(false); }
+  }
+  function toggleMute() { muted = !muted; applyVolume(); }
+
+  volEl.value = MUSIC_VOLUME;
+  loadTrack(orderPos);
+  applyVolume();
+
+  volEl.addEventListener("input", () => { muted = false; applyVolume(); });
+  $("btnPlay").addEventListener("click", (e) => { e.stopPropagation(); togglePlay(); });
+  $("btnMute").addEventListener("click", (e) => { e.stopPropagation(); toggleMute(); });
+  bgm.addEventListener("play", () => setPlayingUi(true));
+  bgm.addEventListener("pause", () => setPlayingUi(false));
+  bgm.addEventListener("ended", () => { orderPos++; loadTrack(orderPos); tryPlay(); });
+  bgm.addEventListener("error", () => {
+    // если трек не найден — пробуем следующий, пока не закончатся
+    if (orderPos < order.length - 1) { orderPos++; loadTrack(orderPos); tryPlay(); }
+    else { failed = true; setPlayingUi(false); hintEl.classList.remove("show"); $("trackName").textContent = "Аудио недоступно"; }
+  });
+
+  tryPlay();
+  const unlock = () => {
+    if (bgm.paused && !failed) tryPlay();
+    document.removeEventListener("pointerdown", unlock);
+    document.removeEventListener("keydown", unlock);
+  };
+  document.addEventListener("pointerdown", unlock);
+  document.addEventListener("keydown", unlock);
+
+  function fadeOutMusic() {
+    const start = bgm.volume;
+    let step = 0;
+    const t = setInterval(() => {
+      step++;
+      bgm.volume = Math.max(0, start * (1 - step / 20));
+      if (step >= 20) clearInterval(t);
+    }, 80);
+  }
+
+  /* ---------- ФАКТЫ ---------- */
+  const fo = FACTS.map((_, i) => i);
+  for (let i = fo.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [fo[i], fo[j]] = [fo[j], fo[i]];
+  }
+  let pos = 0;
+
+  function showFact(first) {
+    const el = $("fact");
+    const apply = () => {
+      const idx = fo[pos % fo.length];
+      el.textContent = FACTS[idx];
+      $("factNo").textContent = pad(idx + 1) + " / " + pad(FACTS.length);
+      el.classList.remove("out");
+    };
+    if (first) { apply(); return; }
+    el.classList.add("out");
+    setTimeout(() => { pos++; apply(); }, 600);
+  }
+  showFact(true);
+  setInterval(() => showFact(false), FACT_INTERVAL);
+
+  /* ---------- ФОНОВЫЕ КАРТИНКИ ---------- */
+  if (BACKGROUNDS.length) {
+    const clip = "clip-path: inset(0 0 0 0)";
+    const layers = [document.createElement("div"), document.createElement("div")];
+    layers.forEach((l) => {
+      l.style.cssText = "position:fixed;inset:0;z-index:0;background-size:cover;background-position:center;" +
+        "filter:grayscale(1) contrast(1.15) brightness(0.4) sepia(0.4) hue-rotate(-25deg) saturate(3);" +
+        "opacity:0;transition:opacity 2.4s ease;" + clip;
+      document.querySelector(".bg").after(l);
+    });
+    let cur = 0, bgPos = 0;
+    const setBg = () => {
+      const next = layers[cur ^ 1];
+      next.style.backgroundImage = "url('" + BACKGROUNDS[bgPos % BACKGROUNDS.length] + "')";
+      next.style.opacity = "1";
+      layers[cur].style.opacity = "0";
+      cur ^= 1;
+      bgPos++;
+    };
+    setBg();
+    if (BACKGROUNDS.length > 1) setInterval(setBg, BG_INTERVAL);
+  }
+
+  /* ---------- ПРОГРЕСС ---------- */
+  function refreshTargets() {
+    if (filesTotal > 0) {
+      const done = Math.max(0, filesTotal - filesNeeded);
+      targetPct = Math.max(0, Math.min(100, (done / filesTotal) * 100));
+      $("count").textContent = done + " из " + filesTotal + " файлов";
+    } else {
+      targetPct = 0;
+      $("count").textContent = "— / —";
+    }
+  }
+  function loop() {
+    shownPct += (targetPct - shownPct) * 0.09;
+    if (Math.abs(targetPct - shownPct) < 0.05) shownPct = targetPct;
+    $("pct").textContent = Math.round(shownPct);
+    $("fill").style.width = shownPct.toFixed(2) + "%";
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------- ЛОГ ---------- */
+  function pushLog(name) {
+    const log = $("log");
+    const d = new Date();
+    const row = document.createElement("div");
+    const t = document.createElement("i");
+    t.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+    row.appendChild(t);
+    row.appendChild(document.createTextNode(name));
+    log.insertBefore(row, log.firstChild);
+    while (log.children.length > 6) log.removeChild(log.lastChild);
+  }
+
+  /* ---------- STEAMID ---------- */
+  function toLegacy(id) {
+    try {
+      const n = BigInt(id);
+      const acc = n - 76561197960265728n;
+      if (acc < 0n) return null;
+      return "STEAM_0:" + (acc % 2n).toString() + ":" + (acc / 2n).toString();
+    } catch (e) { return null; }
+  }
+  function applyPlayer(steamid) {
+    const id = String(steamid || "").trim();
+    if (!id || id === "0") { $("sid64").textContent = "—"; $("sid").textContent = "—"; return; }
+    $("sid64").textContent = id;
+    $("sid").textContent = toLegacy(id) || "—";
+    playtimeKey = "zlc_playtime_" + id;
+    renderPlaytime();
+  }
+
+  /* ---------- ДОП. ДАННЫЕ (карта/режим/онлайн/аптайм/наиграно) ---------- */
+  function fmtDur(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    if (h > 0) return h + " ч " + m + " мин";
+    return m + " мин";
+  }
+  const params = new URLSearchParams(location.search);
+  let playtimeKey = "zlc_playtime_guest";
+
+  function renderPlaytime() {
+    // 1) приоритет — если сервер передал время в ?pt=<минуты>
+    const pt = params.get("pt");
+    if (pt !== null && pt !== "") { $("playtime").textContent = fmtDur(Number(pt) * 60); return; }
+    // 2) иначе — локальный счётчик браузера
+    let acc = 0;
+    try { acc = Number(localStorage.getItem(playtimeKey) || "0"); } catch (e) { acc = 0; }
+    $("playtime").textContent = acc > 0 ? fmtDur(acc) : "—";
+  }
+
+  const up = params.get("up");
+  if (up !== null && up !== "") $("uptime").textContent = fmtDur(Number(up));
+  const pl = params.get("pl");
+  if (pl !== null && pl !== "") $("online").textContent = pl;
+
+  renderPlaytime();
+
+  /* ---------- ФУНКЦИИ GARRY'S MOD ---------- */
+  window.GameDetails = function (servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+    $("host").textContent = servername || "—";
+    $("map").textContent = mapname || "—";
+    $("mode").textContent = gamemode || "—";
+    $("slots").textContent = maxplayers ? String(maxplayers) : "—";
+    applyPlayer(steamid);
+  };
+  window.SetFilesTotal = function (total) { filesTotal = parseInt(total, 10) || 0; refreshTargets(); };
+  window.SetFilesNeeded = function (needed) { filesNeeded = parseInt(needed, 10) || 0; refreshTargets(); };
+  window.SetStatusChanged = function (status) { $("sMain").textContent = status || "Подключение"; $("sSub").textContent = ""; };
+  window.DownloadingFile = function (filename) {
+    $("sMain").textContent = "Загрузка контента";
+    $("sSub").textContent = filename || "";
+    if (filename) pushLog(filename);
+  };
+  window.LoadingComplete = function () {
+    $("sMain").textContent = "Подключение";
+    $("sSub").textContent = "вход в игру";
+    filesNeeded = 0;
+    targetPct = 100;
+    pushLog("загрузка завершена");
+    fadeOutMusic();
+  };
+
+  /* ---------- СТАРТ ---------- */
+  loop();
+  refreshTargets();
+})();
+</script>
+</body>
+</html>
